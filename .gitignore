@@ -1,0 +1,18 @@
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+._*
+
+# エディタ / IDE
+.vscode/
+.idea/
+*.swp
+
+# 一時ファイル
+*.tmp
+*.bak
+~$*
+
+# 作業中の下書き（コミットしたくないもの）
+drafts/
