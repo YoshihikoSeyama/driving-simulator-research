@@ -166,6 +166,16 @@
   }
   .fill b { color: #fff; font-size: 11.5px; font-weight: 650; white-space: nowrap; }
   .fill.short { justify-content: flex-start; padding-right: 0; padding-left: 8px; }
+  .fill.ghost {
+    position: absolute; left: 50%; top: 0; background: var(--accent-soft);
+    border-radius: 0 4px 4px 0; border-left: 2px solid var(--surface-1);
+  }
+  .fill.ghost b { color: var(--accent); }
+  :root[data-theme="dark"] .fill.ghost b { color: #cde2fb; }
+  b.nolabel {
+    position: absolute; left: 8px; top: 50%; transform: translateY(-50%);
+    font-size: 11.5px; font-weight: 600; color: var(--text-secondary); white-space: nowrap;
+  }
   .barrow:hover .fill { filter: brightness(1.08); }
   .tip {
     position: absolute; left: 0; top: -4px; transform: translateY(-100%);
@@ -251,7 +261,8 @@
   <h1>車版ChatGPT ― 画面モック v0.1</h1>
   <p>
     「予算起点」で入り、段階的な質問で文脈を集め、金額と出典つきで返す。通知が主役でチャットは従。<br>
-    <span class="warn-badge">数字はすべて仮データ</span> 実際の料金は調査中。UIの構造を見るためのモックです。
+    <span class="warn-badge">金額は調査ベースの推定値</span>
+    料金は検索経由の二次情報から組んだモデル値です（公式料金表での裏取りは未実施）。
   </p>
   <div class="toolbar">
     <button class="btn" onclick="tgTheme()">ライト / ダーク切替</button>
@@ -333,18 +344,18 @@
       <div class="status-bar"><span>9:41</span><span>●●● ⌁ ▮</span></div>
       <div class="screen">
         <h2 class="sc-title">15,000円でできること</h2>
-        <p class="sc-sub">東京・平日・免責補償込みの実質価格で計算しています。</p>
+        <p class="sc-sub">東京・平日・通常期。<b>免責＋NOC補償込み</b>の実質価格です。</p>
 
         <div class="kpi">
           <div class="tile">
             <div class="lb">最長で借りられる</div>
-            <div class="vl">4<small>日</small></div>
-            <div class="dl">軽自動車の場合</div>
+            <div class="vl">2<small>日</small></div>
+            <div class="dl">軽自動車・あと300円</div>
           </div>
           <div class="tile">
-            <div class="lb">補償込みの上乗せ</div>
+            <div class="lb">補償の上乗せ</div>
             <div class="vl">1,650<small>円/日</small></div>
-            <div class="dl">NOC免除まで含む</div>
+            <div class="dl">軽なら料金の20%</div>
           </div>
         </div>
 
@@ -352,48 +363,59 @@
           <h3>クラス別・借りられる日数</h3>
           <button onclick="tgTable()">表で見る</button>
         </div>
-        <p class="chart-note">予算 15,000円を使い切った場合（仮データ）</p>
+        <p class="chart-note">補償込みの総額で計算（推定値）</p>
 
         <div id="chartView">
           <div class="bars">
             <div class="barrow">
               <div class="cls"><span>軽自動車</span><em>N-BOX 等</em></div>
-              <div class="track"><div class="fill" style="width:100%"><b>4日</b></div></div>
-              <div class="tip">軽自動車 ｜ 4日間<br>実質 14,800円（補償込み）</div>
+              <div class="track">
+                <div class="fill" style="width:50%"><b>1日</b></div>
+                <div class="fill ghost" style="width:50%"><b>2日目</b></div>
+              </div>
+              <div class="tip">軽 ｜ 1日 8,150円 / 2日 15,300円<br>2日は300円だけ足りません</div>
             </div>
             <div class="barrow">
               <div class="cls"><span>コンパクト</span><em>ヤリス・フィット 等</em></div>
-              <div class="track"><div class="fill" style="width:75%"><b>3日</b></div></div>
-              <div class="tip">コンパクト ｜ 3日間<br>実質 14,200円（補償込み）</div>
+              <div class="track"><div class="fill short" style="width:50%"><b>1日</b></div></div>
+              <div class="tip">コンパクト ｜ 1日 10,150円<br>余裕 4,850円</div>
             </div>
             <div class="barrow">
               <div class="cls"><span>ミドル</span><em>カローラ 等</em></div>
-              <div class="track"><div class="fill" style="width:50%"><b>2日</b></div></div>
-              <div class="tip">ミドル ｜ 2日間<br>実質 13,600円（補償込み）</div>
+              <div class="track"><div class="fill short" style="width:50%"><b>1日</b></div></div>
+              <div class="tip">ミドル ｜ 1日 12,650円<br>余裕 2,350円</div>
             </div>
             <div class="barrow">
               <div class="cls"><span>ミニバン</span><em>ノア・ステップワゴン 等</em></div>
-              <div class="track"><div class="fill short" style="width:25%"><b>1日</b></div></div>
-              <div class="tip">ミニバン ｜ 1日間<br>実質 12,900円（補償込み）</div>
+              <div class="track"><div class="fill none" style="width:0"></div><b class="nolabel">届きません（1日 18,200円）</b></div>
+              <div class="tip">ミニバン ｜ 1日 18,200円<br>予算を3,200円超えます</div>
             </div>
           </div>
         </div>
 
         <div id="tableView" class="hidden">
           <table class="tv">
-            <thead><tr><th>クラス</th><th class="n">日数</th><th class="n">実質価格</th></tr></thead>
+            <thead><tr><th>クラス</th><th class="n">日数</th><th class="n">総額</th></tr></thead>
             <tbody>
-              <tr><td>軽自動車</td><td class="n">4日</td><td class="n">14,800円</td></tr>
-              <tr><td>コンパクト</td><td class="n">3日</td><td class="n">14,200円</td></tr>
-              <tr><td>ミドル</td><td class="n">2日</td><td class="n">13,600円</td></tr>
-              <tr><td>ミニバン</td><td class="n">1日</td><td class="n">12,900円</td></tr>
+              <tr><td>軽自動車</td><td class="n">1日</td><td class="n">8,150円</td></tr>
+              <tr><td>軽自動車</td><td class="n">2日</td><td class="n">15,300円</td></tr>
+              <tr><td>コンパクト</td><td class="n">1日</td><td class="n">10,150円</td></tr>
+              <tr><td>ミドル</td><td class="n">1日</td><td class="n">12,650円</td></tr>
+              <tr><td>ミニバン</td><td class="n">1日</td><td class="n">18,200円</td></tr>
             </tbody>
           </table>
         </div>
 
-        <div class="unlock" style="margin-top:16px">
-          <b>3〜4人＋スーツケース2個</b>なら、コンパクト以上を推奨します。
-          軽で4日は取れますが、荷室にLサイズ2個は入りません。
+        <div class="card" style="border-color:var(--accent); margin-top:16px">
+          <span class="tag money">◎ あと300円で1日増える</span>
+          <h4>軽の2日目は、ほぼ届いています</h4>
+          <p>2日目は1日目より<b>安くなります</b>（1日目8,150円 → 2日目は+7,150円）。
+             早割を使えば予算内に収まります。</p>
+        </div>
+
+        <div class="unlock">
+          <b>3〜4人＋スーツケース2個</b>なので、コンパクト以上を推奨します。
+          軽は荷室にLサイズ2個が入りません。
         </div>
       </div>
       <div class="tabs">
@@ -411,22 +433,48 @@
         <h2 class="sc-title">この条件で使える手</h2>
         <p class="sc-sub">あなたの予約に効くものだけ出しています。一般論は出しません。</p>
 
-        <div class="card">
-          <span class="tag money">◎ 3,300円 安くなる</span>
-          <h4>免責補償込みのプランを選ぶ</h4>
-          <p>同じ車・同じ日程でも、補償込みプランなら補償料が実質無料になります。
-             1,100円/日 × 3日分が浮きます。</p>
-          <div class="amt">−3,300円</div>
-          <button class="cta">対象プランを見る</button>
-          <div class="src"><span>出典: タイムズカーレンタル キャンペーン</span><a href="#">確認</a></div>
+        <div class="card" style="border-color:var(--accent)">
+          <span class="tag money">◎ 全日程が安くなる</span>
+          <h4>出発を1日ずらすと 4,600円 安くなります</h4>
+          <p>ハイシーズン料金は<b>出発日で決まり、レンタル期間の全体に適用されます</b>。
+             8/17（日）出発は繁忙期ですが、<b>8/18（月）出発なら通常期</b>になり、
+             2日分すべてが通常料金になります。</p>
+          <div class="amt">−4,600円</div>
+          <button class="cta">8/18 出発で組み直す</button>
+          <div class="src"><span>出典: ニッポンレンタカー ハイシーズン期間</span><a href="#">確認</a></div>
         </div>
 
         <div class="card">
-          <span class="tag">◇ 会社によって差が出る</span>
-          <h4>乗り捨てるなら会社を選ぶ</h4>
-          <p>10km以内ならほぼ全社無料。<b>トヨタだけは同一都道府県内が無料</b>です。
-             東京〜静岡だと会社間で1万円以上の差が出ます。</p>
-          <div class="src"><span>出典: 各社ワンウェイ料金表</span><a href="#">確認</a></div>
+          <span class="tag money">◎ 3,300円 安くなる</span>
+          <h4>免責補償込みのプランを選ぶ</h4>
+          <p>同じ車・同じ日程でも、補償込みプランなら補償料が実質無料に。
+             1,100円/日 × 2日分が浮きます。</p>
+          <div class="amt">−3,300円</div>
+          <div class="src"><span>出典: タイムズ／オリックス キャンペーン</span><a href="#">確認</a></div>
+        </div>
+
+        <div class="card">
+          <span class="tag">⚠ どれか1つしか使えません</span>
+          <h4>割引は併用できません</h4>
+          <p>トヨタは<b>JAF・会員・カード・特割GO! が選択適用</b>です。足し算になりません。
+             あなたの条件では<b>ニッポンのJAF割引（−41%）</b>が最大でした。</p>
+          <table class="tv" style="margin-top:2px">
+            <tbody>
+              <tr><td>ニッポン JAF</td><td class="n">−41%</td></tr>
+              <tr><td>ニッポン 早割45</td><td class="n">−40%</td></tr>
+              <tr><td>トヨタ 特割GO!</td><td class="n">−30%</td></tr>
+              <tr><td>タイムズクラブ Web</td><td class="n">−20%</td></tr>
+            </tbody>
+          </table>
+          <div class="src"><span>出典: 各社割引ページ</span><a href="#">確認</a></div>
+        </div>
+
+        <div class="card">
+          <span class="tag">◇ 3日以上なら別プランへ</span>
+          <h4>3日を超えるならウィークリーの方が安い</h4>
+          <p>軽の24時間料金×7日が23,100円なのに対し、<b>ウィークリープランなら7,700円</b>。
+             日数を増やすと、ある時点で<b>週単位プランに乗り換えた方が安くなります</b>。</p>
+          <div class="src"><span>出典: 業務レンタカー 長期プラン比較</span><a href="#">確認</a></div>
         </div>
 
         <div class="card">
