@@ -1,0 +1,552 @@
+<!DOCTYPE html>
+<html lang="ja" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>車版ChatGPT ― 画面モック</title>
+<style>
+  :root {
+    color-scheme: light;
+    --surface-1:      #fcfcfb;
+    --page:           #f9f9f7;
+    --text-primary:   #0b0b0b;
+    --text-secondary: #52514e;
+    --text-muted:     #898781;
+    --gridline:       #e1e0d9;
+    --baseline:       #c3c2b7;
+    --border:         rgba(11,11,11,0.10);
+    --accent:         #2a78d6;
+    --accent-soft:    #cde2fb;
+    --good:           #0ca30c;
+    --warning:        #fab219;
+    --critical:       #d03b3b;
+    --success-text:   #006300;
+    --chip:           #f0efec;
+  }
+  :root[data-theme="dark"] {
+    color-scheme: dark;
+    --surface-1:      #1a1a19;
+    --page:           #0d0d0d;
+    --text-primary:   #ffffff;
+    --text-secondary: #c3c2b7;
+    --text-muted:     #898781;
+    --gridline:       #2c2c2a;
+    --baseline:       #383835;
+    --border:         rgba(255,255,255,0.10);
+    --accent:         #3987e5;
+    --accent-soft:    #184f95;
+    --good:           #0ca30c;
+    --warning:        #fab219;
+    --critical:       #d03b3b;
+    --success-text:   #0ca30c;
+    --chip:           #262624;
+  }
+
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--page);
+    color: var(--text-primary);
+    font-family: system-ui, -apple-system, "Segoe UI", "Hiragino Sans", sans-serif;
+    padding: 24px 0 48px;
+  }
+
+  .page-head { padding: 0 24px 20px; max-width: 1100px; }
+  .page-head h1 { font-size: 20px; margin: 0 0 6px; font-weight: 650; }
+  .page-head p { margin: 0; color: var(--text-secondary); font-size: 13px; line-height: 1.6; }
+  .toolbar { display: flex; gap: 8px; align-items: center; margin-top: 14px; flex-wrap: wrap; }
+  .btn {
+    font: inherit; font-size: 12px; padding: 6px 12px; border-radius: 8px;
+    border: 1px solid var(--border); background: var(--surface-1);
+    color: var(--text-primary); cursor: pointer;
+  }
+  .btn:hover { background: var(--chip); }
+  .warn-badge {
+    display: inline-block; font-size: 11px; padding: 4px 9px; border-radius: 999px;
+    background: var(--warning); color: #0b0b0b; font-weight: 650;
+  }
+
+  .rail {
+    display: flex; gap: 20px; overflow-x: auto; padding: 8px 24px 24px;
+    scroll-snap-type: x proximity;
+  }
+  .frame-wrap { flex: 0 0 auto; scroll-snap-align: start; }
+  .frame-label {
+    font-size: 12px; color: var(--text-secondary); margin-bottom: 8px;
+    display: flex; align-items: baseline; gap: 8px;
+  }
+  .frame-label b { color: var(--text-primary); font-size: 13px; font-weight: 650; }
+  .phone {
+    width: 340px; height: 700px; background: var(--surface-1);
+    border: 1px solid var(--border); border-radius: 26px; overflow: hidden;
+    display: flex; flex-direction: column;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+  }
+  .status-bar {
+    height: 30px; display: flex; align-items: center; justify-content: space-between;
+    padding: 0 18px; font-size: 11px; color: var(--text-muted); flex: 0 0 auto;
+  }
+  .screen { flex: 1; overflow-y: auto; padding: 4px 18px 18px; }
+  .screen::-webkit-scrollbar { width: 0; }
+
+  h2.sc-title { font-size: 19px; margin: 10px 0 4px; font-weight: 650; line-height: 1.35; }
+  p.sc-sub { font-size: 12.5px; color: var(--text-secondary); margin: 0 0 16px; line-height: 1.6; }
+
+  /* --- step dots --- */
+  .steps { display: flex; gap: 5px; margin: 6px 0 14px; }
+  .steps i { height: 3px; flex: 1; border-radius: 2px; background: var(--gridline); }
+  .steps i.on { background: var(--accent); }
+
+  /* --- budget input --- */
+  .budget-figure {
+    font-size: 50px; font-weight: 650; letter-spacing: -0.02em;
+    margin: 22px 0 2px; line-height: 1;
+  }
+  .budget-figure span { font-size: 22px; font-weight: 550; color: var(--text-secondary); margin-left: 3px; }
+  .slider { width: 100%; margin: 18px 0 6px; accent-color: var(--accent); }
+  .slider-ends { display: flex; justify-content: space-between; font-size: 11px; color: var(--text-muted); }
+  .quick { display: flex; gap: 7px; margin-top: 18px; flex-wrap: wrap; }
+  .quick button {
+    font: inherit; font-size: 12.5px; padding: 8px 13px; border-radius: 999px;
+    border: 1px solid var(--border); background: var(--surface-1); color: var(--text-primary); cursor: pointer;
+  }
+  .quick button.sel { background: var(--accent); border-color: var(--accent); color: #fff; }
+
+  /* --- option cards --- */
+  .opt {
+    display: flex; align-items: center; gap: 12px; padding: 13px 14px;
+    border: 1px solid var(--border); border-radius: 12px; margin-bottom: 9px;
+    background: var(--surface-1); cursor: pointer;
+  }
+  .opt.sel { border-color: var(--accent); box-shadow: inset 0 0 0 1px var(--accent); }
+  .opt .ic { font-size: 19px; width: 26px; text-align: center; }
+  .opt .tx { flex: 1; }
+  .opt .tx b { display: block; font-size: 14px; font-weight: 600; }
+  .opt .tx small { color: var(--text-secondary); font-size: 11.5px; }
+
+  .unlock {
+    font-size: 11.5px; color: var(--text-secondary); background: var(--chip);
+    padding: 9px 12px; border-radius: 9px; margin-top: 14px; line-height: 1.55;
+  }
+  .unlock b { color: var(--text-primary); font-weight: 600; }
+
+  /* --- stat tiles --- */
+  .kpi { display: flex; gap: 9px; margin: 4px 0 18px; }
+  .tile {
+    flex: 1; border: 1px solid var(--border); border-radius: 11px; padding: 11px 12px;
+    background: var(--surface-1);
+  }
+  .tile .lb { font-size: 10.5px; color: var(--text-secondary); margin-bottom: 5px; }
+  .tile .vl { font-size: 20px; font-weight: 650; letter-spacing: -0.01em; line-height: 1.1; }
+  .tile .vl small { font-size: 11.5px; font-weight: 550; color: var(--text-secondary); margin-left: 2px; }
+  .tile .dl { font-size: 10.5px; margin-top: 4px; color: var(--success-text); font-weight: 600; }
+
+  /* --- bar chart --- */
+  .chart-head {
+    display: flex; align-items: baseline; justify-content: space-between; margin-bottom: 3px;
+  }
+  .chart-head h3 { font-size: 13.5px; margin: 0; font-weight: 620; }
+  .chart-head button {
+    font: inherit; font-size: 11px; background: none; border: none;
+    color: var(--accent); cursor: pointer; padding: 0;
+  }
+  .chart-note { font-size: 11px; color: var(--text-muted); margin: 0 0 12px; }
+  .bars { display: flex; flex-direction: column; gap: 2px; }
+  .barrow { padding: 5px 0; position: relative; }
+  .barrow .cls {
+    font-size: 12px; color: var(--text-primary); margin-bottom: 5px;
+    display: flex; justify-content: space-between; align-items: baseline;
+  }
+  .barrow .cls em { font-style: normal; color: var(--text-muted); font-size: 10.5px; }
+  .track { height: 22px; background: var(--gridline); border-radius: 4px; position: relative; overflow: hidden; }
+  .fill {
+    height: 100%; background: var(--accent); border-radius: 0 4px 4px 0;
+    display: flex; align-items: center; justify-content: flex-end;
+    padding-right: 8px; transition: width .25s ease;
+  }
+  .fill b { color: #fff; font-size: 11.5px; font-weight: 650; white-space: nowrap; }
+  .fill.short { justify-content: flex-start; padding-right: 0; padding-left: 8px; }
+  .barrow:hover .fill { filter: brightness(1.08); }
+  .tip {
+    position: absolute; left: 0; top: -4px; transform: translateY(-100%);
+    background: var(--text-primary); color: var(--surface-1);
+    font-size: 11px; padding: 6px 9px; border-radius: 7px; line-height: 1.45;
+    opacity: 0; pointer-events: none; transition: opacity .12s; white-space: nowrap; z-index: 5;
+  }
+  .barrow:hover .tip { opacity: 1; }
+
+  table.tv { width: 100%; border-collapse: collapse; font-size: 11.5px; margin-top: 6px; }
+  table.tv th, table.tv td { text-align: left; padding: 6px 4px; border-bottom: 1px solid var(--gridline); }
+  table.tv th { color: var(--text-secondary); font-weight: 600; }
+  table.tv td.n { text-align: right; font-variant-numeric: tabular-nums; }
+  .hidden { display: none; }
+
+  /* --- knowledge / notification card --- */
+  .card {
+    border: 1px solid var(--border); border-radius: 13px; padding: 14px;
+    margin-bottom: 11px; background: var(--surface-1);
+  }
+  .card .tag {
+    display: inline-flex; align-items: center; gap: 5px; font-size: 10.5px;
+    padding: 3px 8px; border-radius: 999px; background: var(--chip);
+    color: var(--text-secondary); font-weight: 600; margin-bottom: 9px;
+  }
+  .card .tag.money { background: var(--accent-soft); color: var(--accent); }
+  :root[data-theme="dark"] .card .tag.money { color: #cde2fb; }
+  .card h4 { font-size: 14px; margin: 0 0 6px; font-weight: 650; line-height: 1.45; }
+  .card p { font-size: 12px; color: var(--text-secondary); margin: 0 0 9px; line-height: 1.65; }
+  .card .amt { font-size: 17px; font-weight: 650; color: var(--success-text); margin-bottom: 7px; }
+  .card .src {
+    font-size: 10.5px; color: var(--text-muted); padding-top: 9px;
+    border-top: 1px solid var(--gridline); display: flex; justify-content: space-between; gap: 8px;
+  }
+  .card .src a { color: var(--accent); text-decoration: none; }
+  .cta {
+    display: block; width: 100%; font: inherit; font-size: 13px; font-weight: 600;
+    padding: 11px; border-radius: 10px; border: none;
+    background: var(--accent); color: #fff; cursor: pointer; margin-top: 4px;
+  }
+
+  .notif-why {
+    font-size: 11px; color: var(--text-secondary); background: var(--chip);
+    border-radius: 8px; padding: 8px 10px; margin: 9px 0; line-height: 1.55;
+  }
+  .mute {
+    font: inherit; font-size: 11px; background: none; border: none;
+    color: var(--text-muted); cursor: pointer; padding: 0; text-decoration: underline;
+  }
+
+  /* --- chat --- */
+  .bubble { max-width: 84%; padding: 10px 13px; border-radius: 14px; font-size: 12.5px; line-height: 1.65; margin-bottom: 9px; }
+  .bubble.ai { background: var(--chip); color: var(--text-primary); border-bottom-left-radius: 4px; }
+  .bubble.me { background: var(--accent); color: #fff; margin-left: auto; border-bottom-right-radius: 4px; }
+  .bubble .cite { display: block; font-size: 10px; color: var(--text-muted); margin-top: 6px; }
+  .chat-in {
+    display: flex; gap: 7px; align-items: center; border: 1px solid var(--border);
+    border-radius: 999px; padding: 8px 8px 8px 14px; margin-top: 8px; background: var(--surface-1);
+  }
+  .chat-in span { flex: 1; font-size: 12.5px; color: var(--text-muted); }
+  .chat-in i { width: 28px; height: 28px; border-radius: 50%; background: var(--accent); display: grid; place-items: center; color: #fff; font-style: normal; font-size: 13px; }
+  .sugg { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 10px; }
+  .sugg b {
+    font-size: 11.5px; font-weight: 500; padding: 6px 11px; border-radius: 999px;
+    border: 1px solid var(--border); color: var(--text-secondary);
+  }
+
+  /* --- tab bar --- */
+  .tabs {
+    flex: 0 0 auto; display: flex; border-top: 1px solid var(--border); background: var(--surface-1);
+  }
+  .tabs div {
+    flex: 1; text-align: center; padding: 9px 0 12px; font-size: 10px;
+    color: var(--text-muted);
+  }
+  .tabs div.on { color: var(--accent); }
+  .tabs div u { display: block; font-size: 16px; text-decoration: none; margin-bottom: 2px; }
+</style>
+</head>
+<body>
+
+<div class="page-head">
+  <h1>車版ChatGPT ― 画面モック v0.1</h1>
+  <p>
+    「予算起点」で入り、段階的な質問で文脈を集め、金額と出典つきで返す。通知が主役でチャットは従。<br>
+    <span class="warn-badge">数字はすべて仮データ</span> 実際の料金は調査中。UIの構造を見るためのモックです。
+  </p>
+  <div class="toolbar">
+    <button class="btn" onclick="tgTheme()">ライト / ダーク切替</button>
+    <button class="btn" onclick="tgTable()">グラフ / 表 切替</button>
+  </div>
+</div>
+
+<div class="rail">
+
+  <!-- 1. 予算入力 -->
+  <div class="frame-wrap">
+    <div class="frame-label"><b>① 予算入力</b><span>ここが既存サイトと逆</span></div>
+    <div class="phone">
+      <div class="status-bar"><span>9:41</span><span>●●● ⌁ ▮</span></div>
+      <div class="screen">
+        <div class="steps"><i class="on"></i><i></i><i></i><i></i></div>
+        <h2 class="sc-title">予算はいくらですか？</h2>
+        <p class="sc-sub">先に予算を教えてもらえれば、「どのクラスを何日借りられるか」を一覧でお見せします。</p>
+
+        <div class="budget-figure">15,000<span>円</span></div>
+        <input class="slider" type="range" min="5000" max="60000" step="1000" value="15000"
+               oninput="setBudget(this.value)">
+        <div class="slider-ends"><span>5,000円</span><span>60,000円</span></div>
+
+        <div class="quick">
+          <button onclick="qb(this,10000)">10,000</button>
+          <button class="sel" onclick="qb(this,15000)">15,000</button>
+          <button onclick="qb(this,20000)">20,000</button>
+          <button onclick="qb(this,30000)">30,000</button>
+        </div>
+
+        <div class="unlock">
+          <b>なぜ最初に聞くのか</b><br>
+          予約サイトは「日時 → 場所 → クラス → 料金」の順です。でも実際には予算が先に決まっていて、
+          動かせるのは日数かグレードのどちらか。その交換条件を最初にお見せします。
+        </div>
+      </div>
+      <div class="tabs">
+        <div class="on"><u>◎</u>さがす</div><div><u>◇</u>マイカー</div><div><u>◈</u>通知</div><div><u>◍</u>チャット</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 2. 段階的質問 -->
+  <div class="frame-wrap">
+    <div class="frame-label"><b>② 段階的な質問</b><span>1問ごとに何かが開く</span></div>
+    <div class="phone">
+      <div class="status-bar"><span>9:41</span><span>●●● ⌁ ▮</span></div>
+      <div class="screen">
+        <div class="steps"><i class="on"></i><i class="on"></i><i></i><i></i></div>
+        <h2 class="sc-title">何人で乗りますか？</h2>
+        <p class="sc-sub">荷物の量まで分かると、当日「思ったより狭い」を防げます。</p>
+
+        <div class="opt"><div class="ic">👤</div><div class="tx"><b>1〜2人</b><small>軽・コンパクトが選べます</small></div></div>
+        <div class="opt sel"><div class="ic">👥</div><div class="tx"><b>3〜4人</b><small>コンパクト以上を推奨</small></div></div>
+        <div class="opt"><div class="ic">👨‍👩‍👧</div><div class="tx"><b>5〜7人</b><small>ミニバンが必要です</small></div></div>
+
+        <p class="sc-sub" style="margin:18px 0 10px">荷物は？</p>
+        <div class="opt"><div class="ic">🎒</div><div class="tx"><b>手荷物だけ</b></div></div>
+        <div class="opt sel"><div class="ic">🧳</div><div class="tx"><b>スーツケース2個</b><small>Lサイズ想定</small></div></div>
+        <div class="opt"><div class="ic">⛷</div><div class="tx"><b>大きい荷物あり</b><small>ベビーカー・ゴルフ・スキー</small></div></div>
+
+        <div class="unlock">
+          <b>この質問で開くこと</b><br>
+          「3〜4人＋Lスーツケース2個」なら、コンパクトでも積めるかは車種で変わります。
+          ここが分かると<b>荷室の実測データ</b>で絞り込めます。
+        </div>
+      </div>
+      <div class="tabs">
+        <div class="on"><u>◎</u>さがす</div><div><u>◇</u>マイカー</div><div><u>◈</u>通知</div><div><u>◍</u>チャット</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 3. 結果 -->
+  <div class="frame-wrap">
+    <div class="frame-label"><b>③ 予算でできること</b><span>交換条件を一覧で</span></div>
+    <div class="phone">
+      <div class="status-bar"><span>9:41</span><span>●●● ⌁ ▮</span></div>
+      <div class="screen">
+        <h2 class="sc-title">15,000円でできること</h2>
+        <p class="sc-sub">東京・平日・免責補償込みの実質価格で計算しています。</p>
+
+        <div class="kpi">
+          <div class="tile">
+            <div class="lb">最長で借りられる</div>
+            <div class="vl">4<small>日</small></div>
+            <div class="dl">軽自動車の場合</div>
+          </div>
+          <div class="tile">
+            <div class="lb">補償込みの上乗せ</div>
+            <div class="vl">1,650<small>円/日</small></div>
+            <div class="dl">NOC免除まで含む</div>
+          </div>
+        </div>
+
+        <div class="chart-head">
+          <h3>クラス別・借りられる日数</h3>
+          <button onclick="tgTable()">表で見る</button>
+        </div>
+        <p class="chart-note">予算 15,000円を使い切った場合（仮データ）</p>
+
+        <div id="chartView">
+          <div class="bars">
+            <div class="barrow">
+              <div class="cls"><span>軽自動車</span><em>N-BOX 等</em></div>
+              <div class="track"><div class="fill" style="width:100%"><b>4日</b></div></div>
+              <div class="tip">軽自動車 ｜ 4日間<br>実質 14,800円（補償込み）</div>
+            </div>
+            <div class="barrow">
+              <div class="cls"><span>コンパクト</span><em>ヤリス・フィット 等</em></div>
+              <div class="track"><div class="fill" style="width:75%"><b>3日</b></div></div>
+              <div class="tip">コンパクト ｜ 3日間<br>実質 14,200円（補償込み）</div>
+            </div>
+            <div class="barrow">
+              <div class="cls"><span>ミドル</span><em>カローラ 等</em></div>
+              <div class="track"><div class="fill" style="width:50%"><b>2日</b></div></div>
+              <div class="tip">ミドル ｜ 2日間<br>実質 13,600円（補償込み）</div>
+            </div>
+            <div class="barrow">
+              <div class="cls"><span>ミニバン</span><em>ノア・ステップワゴン 等</em></div>
+              <div class="track"><div class="fill short" style="width:25%"><b>1日</b></div></div>
+              <div class="tip">ミニバン ｜ 1日間<br>実質 12,900円（補償込み）</div>
+            </div>
+          </div>
+        </div>
+
+        <div id="tableView" class="hidden">
+          <table class="tv">
+            <thead><tr><th>クラス</th><th class="n">日数</th><th class="n">実質価格</th></tr></thead>
+            <tbody>
+              <tr><td>軽自動車</td><td class="n">4日</td><td class="n">14,800円</td></tr>
+              <tr><td>コンパクト</td><td class="n">3日</td><td class="n">14,200円</td></tr>
+              <tr><td>ミドル</td><td class="n">2日</td><td class="n">13,600円</td></tr>
+              <tr><td>ミニバン</td><td class="n">1日</td><td class="n">12,900円</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="unlock" style="margin-top:16px">
+          <b>3〜4人＋スーツケース2個</b>なら、コンパクト以上を推奨します。
+          軽で4日は取れますが、荷室にLサイズ2個は入りません。
+        </div>
+      </div>
+      <div class="tabs">
+        <div class="on"><u>◎</u>さがす</div><div><u>◇</u>マイカー</div><div><u>◈</u>通知</div><div><u>◍</u>チャット</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 4. 豆知識 -->
+  <div class="frame-wrap">
+    <div class="frame-label"><b>④ 安くする方法</b><span>金額で語る・出典を出す</span></div>
+    <div class="phone">
+      <div class="status-bar"><span>9:41</span><span>●●● ⌁ ▮</span></div>
+      <div class="screen">
+        <h2 class="sc-title">この条件で使える手</h2>
+        <p class="sc-sub">あなたの予約に効くものだけ出しています。一般論は出しません。</p>
+
+        <div class="card">
+          <span class="tag money">◎ 3,300円 安くなる</span>
+          <h4>免責補償込みのプランを選ぶ</h4>
+          <p>同じ車・同じ日程でも、補償込みプランなら補償料が実質無料になります。
+             1,100円/日 × 3日分が浮きます。</p>
+          <div class="amt">−3,300円</div>
+          <button class="cta">対象プランを見る</button>
+          <div class="src"><span>出典: タイムズカーレンタル キャンペーン</span><a href="#">確認</a></div>
+        </div>
+
+        <div class="card">
+          <span class="tag">◇ 会社によって差が出る</span>
+          <h4>乗り捨てるなら会社を選ぶ</h4>
+          <p>10km以内ならほぼ全社無料。<b>トヨタだけは同一都道府県内が無料</b>です。
+             東京〜静岡だと会社間で1万円以上の差が出ます。</p>
+          <div class="src"><span>出典: 各社ワンウェイ料金表</span><a href="#">確認</a></div>
+        </div>
+
+        <div class="card">
+          <span class="tag">⚠ 期限あり・当日は買えない</span>
+          <h4>高速を使うなら周遊パス</h4>
+          <p>北海道なら「道トクふりーぱす×レンタカーセット」で道内高速が4日間7,700円。
+             ただし<b>事前申込制で、当日その場では買えません</b>。</p>
+          <div class="src"><span>出典: NEXCO東日本 ドラ割</span><a href="#">確認</a></div>
+        </div>
+      </div>
+      <div class="tabs">
+        <div class="on"><u>◎</u>さがす</div><div><u>◇</u>マイカー</div><div><u>◈</u>通知</div><div><u>◍</u>チャット</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 5. 能動通知 -->
+  <div class="frame-wrap">
+    <div class="frame-label"><b>⑤ 能動通知</b><span>製品の主役はここ</span></div>
+    <div class="phone">
+      <div class="status-bar"><span>9:41</span><span>●●● ⌁ ▮</span></div>
+      <div class="screen">
+        <h2 class="sc-title">お知らせ</h2>
+        <p class="sc-sub">1日1件まで。金額で語れないことは通知しません。</p>
+
+        <div class="card" style="border-color:var(--accent)">
+          <span class="tag money">◎ 今動けば 10〜40万円</span>
+          <h4>延長保証に入れるのは、あと3ヶ月です</h4>
+          <p><b>何が起きているか</b>— お乗りの車が2026年11月に初回車検を迎えます。</p>
+          <p><b>なぜ今か</b>— 新車延長保証は<b>初回車検までしか新規加入できません</b>。
+             この期限を過ぎると二度と入れません。</p>
+          <p><b>いくらの話か</b>— 5年目にCVTやハイブリッドバッテリーが壊れると10〜40万円。
+             保証料はその数分の1です。</p>
+          <button class="cta">ディーラーに問い合わせる</button>
+          <div class="notif-why">
+            この通知が出た理由: 車検証の<b>初度登録年月（2023年11月）</b>から計算しました。
+          </div>
+          <div class="src">
+            <span>出典: 各社の延長保証規定</span>
+            <button class="mute">この種類を止める</button>
+          </div>
+        </div>
+
+        <div class="card">
+          <span class="tag">◇ 記録しました</span>
+          <h4>タイヤの製造年週を登録しました</h4>
+          <p>2023年第14週製造。<b>2028年4月</b>に点検時期（使用5年）をお知らせします。</p>
+          <div class="src"><span>出典: JATMA 使用年数の目安</span><button class="mute">止める</button></div>
+        </div>
+      </div>
+      <div class="tabs">
+        <div><u>◎</u>さがす</div><div><u>◇</u>マイカー</div><div class="on"><u>◈</u>通知</div><div><u>◍</u>チャット</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 6. チャット -->
+  <div class="frame-wrap">
+    <div class="frame-label"><b>⑥ チャット</b><span>主ではなく従。横に置く</span></div>
+    <div class="phone">
+      <div class="status-bar"><span>9:41</span><span>●●● ⌁ ▮</span></div>
+      <div class="screen">
+        <h2 class="sc-title">なんでも聞く</h2>
+        <p class="sc-sub">あなたの車と予約内容を踏まえて答えます。</p>
+
+        <div class="bubble ai">
+          3〜4人でスーツケース2個、3日間のご予定ですね。<br>
+          気になることがあれば何でも聞いてください。
+        </div>
+        <div class="bubble me">CarPlay って使えますか？</div>
+        <div class="bubble ai">
+          このクラスだと<b>およそ70%</b>で使えます。確約はできません
+          ―レンタカーは車種が当日まで確定しないためです。<br><br>
+          <b>ハズレたときの備え</b><br>
+          ・Bluetooth はほぼ全車で使えます（音楽と通話は問題なし）<br>
+          ・スマホホルダーを持参すればナビは代替できます<br>
+          ・電話予約で「ディスプレイオーディオ付き希望」と伝えると通ることがあります
+          <span class="cite">根拠: このクラスの候補3車種のうち2車種が対応 ／ 出典を見る</span>
+        </div>
+
+        <div class="sugg">
+          <b>荷物は本当に入る？</b><b>保険はどこまで必要？</b><b>返却でよくある失敗は？</b>
+        </div>
+        <div class="chat-in"><span>聞きたいことを入力…</span><i>↑</i></div>
+      </div>
+      <div class="tabs">
+        <div><u>◎</u>さがす</div><div><u>◇</u>マイカー</div><div><u>◈</u>通知</div><div class="on"><u>◍</u>チャット</div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+  function tgTheme() {
+    const r = document.documentElement;
+    r.dataset.theme = r.dataset.theme === 'dark' ? 'light' : 'dark';
+  }
+  function tgTable() {
+    document.getElementById('chartView').classList.toggle('hidden');
+    document.getElementById('tableView').classList.toggle('hidden');
+  }
+  function setBudget(v) {
+    document.querySelector('.budget-figure').innerHTML =
+      Number(v).toLocaleString() + '<span>円</span>';
+    document.querySelectorAll('.quick button').forEach(b => b.classList.remove('sel'));
+  }
+  function qb(el, v) {
+    document.querySelector('.slider').value = v;
+    setBudget(v);
+    el.classList.add('sel');
+  }
+  document.querySelectorAll('.opt').forEach(o => {
+    o.addEventListener('click', () => {
+      o.parentElement.querySelectorAll('.opt').forEach(x => {
+        if (x.previousElementSibling?.tagName === o.previousElementSibling?.tagName) {}
+      });
+      o.classList.toggle('sel');
+    });
+  });
+</script>
+</body>
+</html>
